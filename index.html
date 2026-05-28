@@ -281,6 +281,10 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
         Actualizar app
       </button>
+      <button class="sb-update-btn" style="color:var(--blue);background:rgba(0,122,255,.08);" onclick="closeSidebar();openRecovery()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10z"/><path d="M12 8v4l3 3"/></svg>
+        Recuperar datos
+      </button>
       <button class="sb-signout" onclick="signOutUser()">⎋ Cerrar sesión</button>
     </div>
   </div>
@@ -467,11 +471,25 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
     <button class="btn" style="width:100%;background:linear-gradient(135deg,#34c759,#1a8f3c);color:#fff;box-shadow:0 4px 18px rgba(52,199,89,.38);font-size:.9rem;padding:13px;" onclick="submitQuickSale()">✓ Registrar Venta</button>
   </div>
 </div>
+<div class="modal-overlay" id="recovery-modal" onclick="maybeClose('recovery-modal',event)">
+  <div class="modal-sheet"><div class="modal-handle"></div>
+    <div class="modal-title">🔍 Diagnóstico de datos</div>
+    <div id="rec-content" style="margin-bottom:18px;"></div>
+    <div id="rec-actions" style="display:flex;flex-direction:column;gap:10px;">
+      <button id="rec-restore-btn" class="btn" style="background:linear-gradient(135deg,var(--blue),#0055D4);color:#fff;display:none;" onclick="restoreFromLocal()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px;"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Restaurar desde respaldo local
+      </button>
+      <button id="rec-force-save-btn" class="btn btn-secondary" onclick="forceSaveToFirestore()">Forzar guardado en nube</button>
+      <button class="btn btn-secondary" onclick="closeModal('recovery-modal')">Cerrar</button>
+    </div>
+  </div>
+</div>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script>
-var APP_VERSION='1.6.0',APP_BUILD='28/05/26';
+var APP_VERSION='1.6.1',APP_BUILD='28/05/26';
 document.getElementById('sb-version').textContent='v'+APP_VERSION+' · '+APP_BUILD;
 var firebaseConfig={apiKey:'AIzaSyDpzlN1gaJUH6XGAWv5GRW_suk7zcqKeJE',authDomain:'medtrack-cima-3e9c1.firebaseapp.com',projectId:'medtrack-cima-3e9c1',storageBucket:'medtrack-cima-3e9c1.firebasestorage.app',messagingSenderId:'110780335014',appId:'1:110780335014:web:b991d26e01637bdc884567'};
 if(typeof firebase!=='undefined'&&!firebase.apps.length)firebase.initializeApp(firebaseConfig);
@@ -585,6 +603,35 @@ function setSADir(dir){saDir=dir;document.getElementById('sa-btn-add').classList
 function adjSAQty(d){var inp=document.getElementById('sa-qty'),v=parseInt(inp.value)||1;inp.value=Math.max(1,v+d);updStockAdj();}
 function updStockAdj(){var p=state.products.find(function(x){return x.id===saId;});if(!p)return;var qty=parseInt(document.getElementById('sa-qty').value)||0,nv=saDir==='add'?p.stock+qty:Math.max(0,p.stock-qty),clr=saDir==='add'?'#34C759':'#FF3B30',sym=saDir==='add'?'+':'-';document.getElementById('sa-current').textContent='Stock actual: '+p.stock+' uds';document.getElementById('sa-preview').innerHTML='<span style="font-size:.82rem;color:var(--text3);">Resultado</span><br><span style="font-size:1.05rem;color:var(--text3);">'+p.stock+'</span><span style="font-size:1.2rem;margin:0 8px;color:var(--text3);">→</span><span style="font-size:1.5rem;font-weight:800;color:'+clr+';">'+nv+'</span><span style="font-size:.78rem;color:'+clr+';margin-left:6px;">('+sym+qty+')</span>';}
 function submitStockAdj(){var p=state.products.find(function(x){return x.id===saId;});if(!p)return;var qty=parseInt(document.getElementById('sa-qty').value)||0;if(qty<1){toast('⚠️ Ingresá una cantidad válida');return;}var prev=p.stock;if(saDir==='add')p.stock+=qty;else p.stock=Math.max(0,p.stock-qty);save();renderCat(p.category);renderDash();closeModal('stock-adj-modal');toast((saDir==='add'?'✅ +':'✅ -')+qty+' '+p.name+' ('+prev+' → '+p.stock+')');}
+function openRecovery(){
+  var ls={};try{ls=JSON.parse(localStorage.getItem('telicioso')||'{}');}catch(e){}
+  var lsP=(ls.products||[]).length,lsS=(ls.sales||[]).length,lsE=(ls.expenses||[]).length;
+  var curP=state.products.length,curS=state.sales.length,curE=state.expenses.length;
+  var email=_user?_user.email:'No identificado';
+  var row=function(lbl,n,color){return'<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:.82rem;border-bottom:1px solid rgba(0,0,0,.05);"><span style="color:var(--text3);">'+lbl+'</span><span style="font-weight:700;color:'+color+';">'+n+'</span></div>';};
+  var block=function(title,p,s,e,clr){return'<div style="background:rgba(0,0,0,.04);border-radius:12px;padding:12px 14px;margin-bottom:10px;"><div style="font-weight:700;font-size:.82rem;margin-bottom:8px;color:var(--text2);">'+title+'</div>'+row('Productos',p,p>0?'var(--green)':'var(--text3)')+row('Ventas',s,s>0?'var(--blue)':'var(--text3)')+row('Gastos',e,e>0?'var(--accent)':'var(--text3)')+'</div>';};
+  document.getElementById('rec-content').innerHTML=
+    '<div style="font-size:.8rem;margin-bottom:14px;padding:10px 14px;background:rgba(0,122,255,.08);border-radius:10px;color:var(--blue);"><b>Cuenta:</b> '+email+'</div>'+
+    block('Datos cargados en app ahora',curP,curS,curE)+
+    block('Respaldo guardado en este dispositivo',lsP,lsS,lsE);
+  var restoreBtn=document.getElementById('rec-restore-btn');
+  restoreBtn.style.display=lsP>0?'block':'none';
+  restoreBtn.textContent=lsP>curP?'✅ Restaurar '+lsP+' productos desde respaldo':'↩ Cargar respaldo local ('+lsP+' productos)';
+  openModal('recovery-modal');
+}
+function restoreFromLocal(){
+  var ls={};try{ls=JSON.parse(localStorage.getItem('telicioso')||'{}');}catch(e){}
+  if(!ls.products||!ls.products.length){toast('⚠️ El respaldo local está vacío');return;}
+  if(ls.products)state.products=ls.products;
+  if(ls.sales)state.sales=ls.sales;
+  if(ls.expenses)state.expenses=ls.expenses;
+  var r=ref();if(r)r.set({products:state.products,sales:state.sales,expenses:state.expenses,updated:new Date().toISOString()}).then(function(){toast('✅ '+state.products.length+' productos restaurados y guardados en nube');}).catch(function(){toast('⚠️ Restaurado localmente, error al guardar en nube');});
+  renderAll();closeModal('recovery-modal');
+}
+function forceSaveToFirestore(){
+  var r=ref();if(!r){toast('⚠️ Sin conexión a nube');return;}
+  r.set({products:state.products,sales:state.sales,expenses:state.expenses,updated:new Date().toISOString()}).then(function(){saveLS();toast('✅ Datos guardados en nube ('+state.products.length+' productos)');}).catch(function(e){toast('⚠️ Error: '+e.message);});
+}
 function setVentasTab(t,btn){vT=t;document.querySelectorAll('#view-ventas .tab').forEach(function(b){b.classList.remove('active');});if(btn)btn.classList.add('active');document.getElementById('ventas-nueva').style.display=t==='nueva'?'block':'none';document.getElementById('ventas-historial').style.display=t==='historial'?'block':'none';if(t==='historial')renderSalesHist();}
 function renderVentas(){renderSaleItems();if(vT==='historial')renderSalesHist();}
 function renderSaleItems(){var c=document.getElementById('sale-products-list');if(!c)return;var prods=state.products.filter(function(p){return p.active;});if(!prods.length){c.innerHTML='<div class="empty-state">Sin productos</div>';return;}c.innerHTML='<div style="max-height:340px;overflow-y:auto;border:1px solid rgba(255,255,255,.5);border-radius:10px;">'+prods.map(function(p){return'<div class="sale-item-row"><div class="sale-item-info"><div class="sale-item-name">'+p.name+'</div><div class="sale-item-detail">'+$m(p.price)+' · Stock: <b>'+p.stock+'</b></div></div><input type="number" class="sale-qty-input" data-pid="'+p.id+'" data-price="'+p.price+'" placeholder="0" min="0" value="0" oninput="updT()"><div class="sale-item-subtotal" id="ss-'+p.id+'"></div></div>';}).join('')+'</div>';updT();}
