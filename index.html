@@ -489,16 +489,16 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script>
-var APP_VERSION='1.6.1',APP_BUILD='28/05/26';
+var APP_VERSION='1.7.0',APP_BUILD='28/05/26';
 document.getElementById('sb-version').textContent='v'+APP_VERSION+' · '+APP_BUILD;
 var firebaseConfig={apiKey:'AIzaSyDpzlN1gaJUH6XGAWv5GRW_suk7zcqKeJE',authDomain:'medtrack-cima-3e9c1.firebaseapp.com',projectId:'medtrack-cima-3e9c1',storageBucket:'medtrack-cima-3e9c1.firebasestorage.app',messagingSenderId:'110780335014',appId:'1:110780335014:web:b991d26e01637bdc884567'};
 if(typeof firebase!=='undefined'&&!firebase.apps.length)firebase.initializeApp(firebaseConfig);
 var _auth=typeof firebase!=='undefined'?firebase.auth():null;
 var _db=typeof firebase!=='undefined'?firebase.firestore():null;
 var ADMIN_EMAILS=['ivangarcian@gmail.com'];
-var _user=null,state={products:[],sales:[],expenses:[]},curView='dash',gF='all',vT='nueva',gT='nuevo',asCat='',toastT=null,saveT=null;
+var _user=null,state={products:[],sales:[],expenses:[]},curView='dash',gF='all',vT='nueva',gT='nuevo',asCat='',toastT=null,saveT=null,_unsubData=null;
 function signInGoogle(){if(!_auth){showApp();return;}var p=new firebase.auth.GoogleAuthProvider();p.addScope('profile');p.addScope('email');_auth.signInWithPopup(p).catch(function(e){var el=document.getElementById('login-error');el.textContent='⚠️ '+e.message;el.style.display='block';});}
-function signOutUser(){if(_auth)_auth.signOut();document.getElementById('app').style.display='none';document.getElementById('access-denied').style.display='none';document.getElementById('login-screen').style.display='flex';}
+function signOutUser(){if(_unsubData){_unsubData();_unsubData=null;}if(_auth)_auth.signOut();document.getElementById('app').style.display='none';document.getElementById('access-denied').style.display='none';document.getElementById('login-screen').style.display='flex';}
 function showApp(){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='flex';loadLS();seedD();renderAll();}
 function isAdmin(){return _user&&ADMIN_EMAILS.indexOf(_user.email)!==-1;}
 function refAccess(){return _db?_db.collection('telicioso_config').doc('access'):null;}
@@ -561,8 +561,30 @@ function removeAccessUser(email){
   }).then(function(){toast('Acceso removido: '+email);loadAccessUsers();}).catch(function(e){toast('⚠️ Error: '+e.message);});
 }
 if(_auth){_auth.onAuthStateChanged(function(u){_user=u;if(!u){document.getElementById('app').style.display='none';document.getElementById('access-denied').style.display='none';document.getElementById('login-screen').style.display='flex';return;}checkUserAccess(u);});}
-function ref(){return(_db&&_user)?_db.collection('users').doc(_user.uid).collection('telicioso').doc('data'):null;}
-function loadData(){var r=ref();if(!r){loadLS();seedD();renderAll();return;}r.get().then(function(d){if(d.exists){var x=d.data();if(x.products)state.products=x.products;if(x.sales)state.sales=x.sales;if(x.expenses)state.expenses=x.expenses;if(!state.products.length)seedD();}else{loadLS();seedD();}renderAll();}).catch(function(){loadLS();seedD();renderAll();});}
+function ref(){return _db?_db.collection('telicioso_shared').doc('data'):null;}
+function refLegacy(){return(_db&&_user)?_db.collection('users').doc(_user.uid).collection('telicioso').doc('data'):null;}
+function loadData(){
+  var r=ref();if(!r){loadLS();seedD();renderAll();return;}
+  if(_unsubData){_unsubData();_unsubData=null;}
+  _unsubData=r.onSnapshot(function(d){
+    if(d.exists){
+      var x=d.data();
+      if(x.products)state.products=x.products;
+      if(x.sales)state.sales=x.sales;
+      if(x.expenses)state.expenses=x.expenses;
+      if(!state.products.length)seedD();
+      renderAll();
+    }else{
+      var leg=refLegacy();
+      if(leg){leg.get().then(function(ld){
+        if(ld.exists){var x=ld.data();if(x.products)state.products=x.products;if(x.sales)state.sales=x.sales;if(x.expenses)state.expenses=x.expenses;save();toast('✅ Datos sincronizados al espacio compartido');}
+        else{loadLS();seedD();}
+        renderAll();
+      }).catch(function(){loadLS();seedD();renderAll();});}
+      else{loadLS();seedD();renderAll();}
+    }
+  },function(){loadLS();seedD();renderAll();});
+}
 function save(){if(saveT)clearTimeout(saveT);saveT=setTimeout(function(){saveLS();var r=ref();if(r)r.set({products:state.products,sales:state.sales,expenses:state.expenses,updated:new Date().toISOString()}).catch(function(){});},800);}
 function saveLS(){try{localStorage.setItem('telicioso',JSON.stringify(state));}catch(e){}}
 function loadLS(){try{var d=JSON.parse(localStorage.getItem('telicioso')||'{}');if(d.products)state.products=d.products;if(d.sales)state.sales=d.sales;if(d.expenses)state.expenses=d.expenses;}catch(e){}}
