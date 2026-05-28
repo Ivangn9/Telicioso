@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Telicioso</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3CclipPath id='c'%3E%3Ccircle cx='50' cy='50' r='48'/%3E%3C/clipPath%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='48' fill='%23E8622A'/%3E%3Cellipse cx='34' cy='30' rx='16' ry='11' fill='rgba(255,255,255,.18)' clip-path='url(%23c)'/%3E%3Cpath d='M50 8 L84 70 L16 70 Z' fill='%23d4a843' clip-path='url(%23c)'/%3E%3Cpath d='M50 14 L78 64 L22 64 Z' fill='%23bf3010' opacity='.38' clip-path='url(%23c)'/%3E%3Cpath d='M30 16 C36 4 64 4 70 16' stroke='%23b8832a' stroke-width='5.5' fill='none' stroke-linecap='round' clip-path='url(%23c)'/%3E%3Ccircle cx='35' cy='53' r='6.5' fill='white' opacity='.9' clip-path='url(%23c)'/%3E%3Ccircle cx='58' cy='48' r='5.5' fill='white' opacity='.9' clip-path='url(%23c)'/%3E%3Ccircle cx='47' cy='39' r='4.5' fill='white' opacity='.9' clip-path='url(%23c)'/%3E%3Ccircle cx='35' cy='53' r='3.8' fill='%23bf2a1a' opacity='.75' clip-path='url(%23c)'/%3E%3Ccircle cx='58' cy='48' r='3.2' fill='%23bf2a1a' opacity='.75' clip-path='url(%23c)'/%3E%3Ccircle cx='47' cy='39' r='2.5' fill='%23bf2a1a' opacity='.75' clip-path='url(%23c)'/%3E%3Cellipse cx='50' cy='80' rx='30' ry='14' fill='%23c9a040' clip-path='url(%23c)'/%3E%3Cpath d='M20 80 Q50 57 80 80' fill='%23e0bc48' clip-path='url(%23c)'/%3E%3Cpath d='M25 80 Q50 60 75 80' fill='none' stroke='rgba(255,255,255,.52)' stroke-width='2' stroke-dasharray='4,3' clip-path='url(%23c)'/%3E%3Ccircle cx='50' cy='50' r='48' fill='none' stroke='rgba(255,255,255,.15)' stroke-width='2'/%3E%3C/svg%3E">
 <style>
 :root{
   --accent:#E8622A;--accent2:#C44D1A;
@@ -183,7 +184,29 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
 <div id="toast"></div>
 <div id="login-screen">
   <div class="login-card">
-    <div class="login-emoji">🍕</div>
+    <div class="login-emoji" style="font-size:0;line-height:0;margin-bottom:6px;">
+      <svg viewBox="0 0 90 90" width="80" height="80" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;">
+        <defs>
+          <radialGradient id="lbg" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#F07840"/><stop offset="100%" stop-color="#D04818"/></radialGradient>
+          <clipPath id="lc"><circle cx="45" cy="45" r="43"/></clipPath>
+        </defs>
+        <circle cx="45" cy="45" r="43" fill="url(#lbg)"/>
+        <ellipse cx="31" cy="27" rx="16" ry="11" fill="rgba(255,255,255,.18)" clip-path="url(#lc)"/>
+        <path d="M45 7 L80 67 L10 67 Z" fill="#d4a843" clip-path="url(#lc)"/>
+        <path d="M45 14 L75 62 L15 62 Z" fill="#bf3010" opacity=".38" clip-path="url(#lc)"/>
+        <path d="M27 15 C33 3 57 3 63 15" stroke="#b8832a" stroke-width="5.5" fill="none" stroke-linecap="round" clip-path="url(#lc)"/>
+        <circle cx="33" cy="52" r="6.5" fill="white" opacity=".92" clip-path="url(#lc)"/>
+        <circle cx="57" cy="48" r="5.5" fill="white" opacity=".92" clip-path="url(#lc)"/>
+        <circle cx="46" cy="38" r="4.5" fill="white" opacity=".92" clip-path="url(#lc)"/>
+        <circle cx="33" cy="52" r="3.8" fill="#bf2a1a" opacity=".78" clip-path="url(#lc)"/>
+        <circle cx="57" cy="48" r="3.2" fill="#bf2a1a" opacity=".78" clip-path="url(#lc)"/>
+        <circle cx="46" cy="38" r="2.5" fill="#bf2a1a" opacity=".78" clip-path="url(#lc)"/>
+        <ellipse cx="45" cy="78" rx="30" ry="14" fill="#c9a040" clip-path="url(#lc)"/>
+        <path d="M15 78 Q45 55 75 78" fill="#e0bc48" clip-path="url(#lc)"/>
+        <path d="M20 78 Q45 58 70 78" fill="none" stroke="rgba(255,255,255,.52)" stroke-width="2.2" stroke-dasharray="4.5,3.5" clip-path="url(#lc)"/>
+        <circle cx="45" cy="45" r="43" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="2"/>
+      </svg>
+    </div>
     <div class="login-title">Telicioso</div>
     <div class="login-sub">Pizzas · Empanadas · Ñoquis<br>Control de stock, ventas y finanzas</div>
     <button class="btn-google" onclick="signInGoogle()">
@@ -191,6 +214,15 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
       Iniciar sesión con Google
     </button>
     <div id="login-error"></div>
+  </div>
+</div>
+<div id="access-denied" style="display:none;position:fixed;inset:0;z-index:998;align-items:center;justify-content:center;background:radial-gradient(ellipse 80% 60% at 20% 20%,rgba(232,98,42,.18) 0%,transparent 60%),radial-gradient(ellipse 60% 70% at 80% 80%,rgba(212,168,67,.15) 0%,transparent 60%),linear-gradient(160deg,#f8f0e8 0%,#f0e8de 100%);">
+  <div class="login-card">
+    <div style="font-size:2.8rem;margin-bottom:10px;">🔒</div>
+    <div style="font-size:1.3rem;font-weight:800;color:var(--text);margin-bottom:6px;">Sin acceso</div>
+    <div style="font-size:.84rem;color:var(--text3);margin-bottom:20px;line-height:1.6;">Tu cuenta no tiene permiso para acceder a Telicioso.<br>Contactá al administrador.</div>
+    <div id="denied-email" style="font-size:.75rem;color:var(--text3);background:rgba(0,0,0,.05);padding:8px 12px;border-radius:10px;margin-bottom:20px;word-break:break-all;"></div>
+    <button class="btn-google" onclick="signOutUser()" style="background:rgba(255,59,48,.06);border-color:rgba(255,59,48,.2);color:var(--red);">⎋ Cerrar sesión</button>
   </div>
 </div>
 <div id="app" style="display:none">
@@ -217,6 +249,10 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
       <div class="sb-section-lbl">Gestión</div>
       <button class="sb-nav-btn" data-view="gestion" onclick="setView('gestion')"><span class="icon">📦</span> Gestión</button>
       <button class="sb-nav-btn" data-view="financiero" onclick="setView('financiero')"><span class="icon">📊</span> Control Financiero</button>
+      <div id="access-admin-wrap" style="display:none;">
+        <div class="sb-section-lbl">Administración</div>
+        <button class="sb-nav-btn" onclick="closeSidebar();openAccessManager()"><span class="icon">🔐</span> Acceso usuarios</button>
+      </div>
     </div>
     <div class="sb-footer">
       <div class="sb-version" id="sb-version">v1.0.0</div>
@@ -327,6 +363,24 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
 <div class="modal-overlay" id="add-stock-modal" onclick="maybeClose('add-stock-modal',event)">
   <div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title">Agregar Stock</div><div class="form-group"><label class="form-label">Producto</label><select class="form-input" id="as-product"></select></div><div class="form-group"><label class="form-label">Cantidad</label><input class="form-input" type="number" id="as-qty" min="1" value="1"></div><div style="display:flex;gap:10px;margin-top:6px;"><button class="btn btn-secondary" style="flex:1" onclick="closeModal('add-stock-modal')">Cancelar</button><button class="btn btn-primary" style="flex:2" onclick="submitAddStock()">+ Agregar</button></div></div>
 </div>
+<div class="modal-overlay" id="access-modal" onclick="maybeClose('access-modal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div class="modal-title" style="margin-bottom:0;">🔐 Gestionar Acceso</div>
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('access-modal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Agregar usuario por email</label>
+      <div style="display:flex;gap:8px;">
+        <input class="form-input" id="access-email-input" placeholder="usuario@gmail.com" type="email" style="flex:1;">
+        <button class="btn btn-primary btn-sm" onclick="addAccessUser()">Agregar</button>
+      </div>
+    </div>
+    <div style="font-size:.75rem;font-weight:650;color:var(--text2);margin-bottom:8px;margin-top:4px;">Usuarios con acceso</div>
+    <div id="access-users-list"></div>
+  </div>
+</div>
 <button class="update-fab" onclick="doUpdate()">🔄</button>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
@@ -338,11 +392,72 @@ var firebaseConfig={apiKey:'AIzaSyDpzlN1gaJUH6XGAWv5GRW_suk7zcqKeJE',authDomain:
 if(typeof firebase!=='undefined'&&!firebase.apps.length)firebase.initializeApp(firebaseConfig);
 var _auth=typeof firebase!=='undefined'?firebase.auth():null;
 var _db=typeof firebase!=='undefined'?firebase.firestore():null;
+var ADMIN_EMAILS=['ivangarcian@gmail.com'];
 var _user=null,state={products:[],sales:[],expenses:[]},curView='dash',gF='all',vT='nueva',gT='nuevo',asCat='',toastT=null,saveT=null;
 function signInGoogle(){if(!_auth){showApp();return;}var p=new firebase.auth.GoogleAuthProvider();p.addScope('profile');p.addScope('email');_auth.signInWithPopup(p).catch(function(e){var el=document.getElementById('login-error');el.textContent='⚠️ '+e.message;el.style.display='block';});}
-function signOutUser(){if(_auth)_auth.signOut();document.getElementById('app').style.display='none';document.getElementById('login-screen').style.display='flex';}
+function signOutUser(){if(_auth)_auth.signOut();document.getElementById('app').style.display='none';document.getElementById('access-denied').style.display='none';document.getElementById('login-screen').style.display='flex';}
 function showApp(){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='flex';loadLS();seedD();renderAll();}
-if(_auth){_auth.onAuthStateChanged(function(u){_user=u;if(!u){document.getElementById('app').style.display='none';document.getElementById('login-screen').style.display='flex';return;}document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='flex';var av=document.getElementById('sb-avatar');document.getElementById('sb-name').textContent=u.displayName||u.email||'Usuario';document.getElementById('sb-email').textContent=u.email||'';if(u.photoURL){av.innerHTML='<img src="'+u.photoURL+'" alt="">';}else{av.textContent=(u.displayName||u.email||'?').charAt(0).toUpperCase();}loadData();});}
+function isAdmin(){return _user&&ADMIN_EMAILS.indexOf(_user.email)!==-1;}
+function refAccess(){return _db?_db.collection('telicioso_config').doc('access'):null;}
+function checkUserAccess(u){
+  if(isAdmin()){showAppNow(u);return;}
+  var r=refAccess();
+  if(!r){showAccessDenied(u);return;}
+  r.get().then(function(d){
+    var allowed=(d.exists&&d.data().allowedEmails)||[];
+    if(allowed.indexOf(u.email)!==-1){showAppNow(u);}else{showAccessDenied(u);}
+  }).catch(function(){showAccessDenied(u);});
+}
+function showAppNow(u){
+  document.getElementById('access-denied').style.display='none';
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  var av=document.getElementById('sb-avatar');
+  document.getElementById('sb-name').textContent=u.displayName||u.email||'Usuario';
+  document.getElementById('sb-email').textContent=u.email||'';
+  if(u.photoURL){av.innerHTML='<img src="'+u.photoURL+'" alt="">';}else{av.textContent=(u.displayName||u.email||'?').charAt(0).toUpperCase();}
+  if(isAdmin())document.getElementById('access-admin-wrap').style.display='block';
+  loadData();
+}
+function showAccessDenied(u){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='none';
+  document.getElementById('access-denied').style.display='flex';
+  document.getElementById('denied-email').textContent=u.email||'';
+}
+function openAccessManager(){loadAccessUsers();openModal('access-modal');}
+function loadAccessUsers(){
+  var el=document.getElementById('access-users-list');
+  el.innerHTML='<div style="color:var(--text3);font-size:.82rem;padding:8px 0;">Cargando...</div>';
+  var r=refAccess();if(!r){el.innerHTML='<div style="color:var(--text3);font-size:.82rem;">Sin conexión</div>';return;}
+  r.get().then(function(d){
+    var emails=(d.exists&&d.data().allowedEmails)||[];
+    if(!emails.length){el.innerHTML='<div style="color:var(--text3);font-size:.82rem;padding:10px 0;">Sin usuarios agregados aún.</div>';return;}
+    el.innerHTML=emails.map(function(e){return'<div style="display:flex;align-items:center;padding:10px 12px;background:rgba(255,255,255,.48);border:1px solid rgba(255,255,255,.65);border-radius:10px;margin-bottom:6px;"><span style="flex:1;font-size:.83rem;color:var(--text);word-break:break-all;">'+e+'</span><button class="del-btn" onclick="removeAccessUser(\''+e.replace(/'/g,"\\'")+'\')" title="Quitar acceso">✕</button></div>';}).join('');
+  });
+}
+function addAccessUser(){
+  var inp=document.getElementById('access-email-input'),email=inp.value.trim().toLowerCase();
+  if(!email||!/\S+@\S+\.\S+/.test(email)){toast('⚠️ Email inválido');return;}
+  if(ADMIN_EMAILS.indexOf(email)!==-1){toast('⚠️ Es un email de administrador');return;}
+  var r=refAccess();if(!r)return;
+  r.get().then(function(d){
+    var emails=(d.exists&&d.data().allowedEmails)||[];
+    if(emails.indexOf(email)!==-1){toast('⚠️ Ya tiene acceso');return;}
+    emails.push(email);
+    return r.set({allowedEmails:emails});
+  }).then(function(){inp.value='';toast('✅ Acceso otorgado a '+email);loadAccessUsers();}).catch(function(e){toast('⚠️ Error: '+e.message);});
+}
+function removeAccessUser(email){
+  if(!confirm('¿Quitar acceso a '+email+'?'))return;
+  var r=refAccess();if(!r)return;
+  r.get().then(function(d){
+    var emails=(d.exists&&d.data().allowedEmails)||[];
+    var idx=emails.indexOf(email);if(idx!==-1)emails.splice(idx,1);
+    return r.set({allowedEmails:emails});
+  }).then(function(){toast('Acceso removido: '+email);loadAccessUsers();}).catch(function(e){toast('⚠️ Error: '+e.message);});
+}
+if(_auth){_auth.onAuthStateChanged(function(u){_user=u;if(!u){document.getElementById('app').style.display='none';document.getElementById('access-denied').style.display='none';document.getElementById('login-screen').style.display='flex';return;}checkUserAccess(u);});}
 function ref(){return(_db&&_user)?_db.collection('users').doc(_user.uid).collection('telicioso').doc('data'):null;}
 function loadData(){var r=ref();if(!r){loadLS();seedD();renderAll();return;}r.get().then(function(d){if(d.exists){var x=d.data();if(x.products)state.products=x.products;if(x.sales)state.sales=x.sales;if(x.expenses)state.expenses=x.expenses;if(!state.products.length)seedD();}else{loadLS();seedD();}renderAll();}).catch(function(){loadLS();seedD();renderAll();});}
 function save(){if(saveT)clearTimeout(saveT);saveT=setTimeout(function(){saveLS();var r=ref();if(r)r.set({products:state.products,sales:state.sales,expenses:state.expenses,updated:new Date().toISOString()}).catch(function(){});},800);}
