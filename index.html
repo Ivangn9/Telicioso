@@ -3,12 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="app-version" content="v2026.05.28.2">
+<meta name="app-version" content="v2026.05.28.3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Telicioso">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#E8622A">
 <title>Telicioso</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3CclipPath id='c'%3E%3Ccircle cx='50' cy='50' r='48'/%3E%3C/clipPath%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='48' fill='%23E8622A'/%3E%3Cellipse cx='34' cy='30' rx='16' ry='11' fill='rgba(255,255,255,.18)' clip-path='url(%23c)'/%3E%3Cpath d='M50 8 L84 70 L16 70 Z' fill='%23d4a843' clip-path='url(%23c)'/%3E%3Cpath d='M50 14 L78 64 L22 64 Z' fill='%23bf3010' opacity='.38' clip-path='url(%23c)'/%3E%3Cpath d='M30 16 C36 4 64 4 70 16' stroke='%23b8832a' stroke-width='5.5' fill='none' stroke-linecap='round' clip-path='url(%23c)'/%3E%3Ccircle cx='35' cy='53' r='6.5' fill='white' opacity='.9' clip-path='url(%23c)'/%3E%3Ccircle cx='58' cy='48' r='5.5' fill='white' opacity='.9' clip-path='url(%23c)'/%3E%3Ccircle cx='47' cy='39' r='4.5' fill='white' opacity='.9' clip-path='url(%23c)'/%3E%3Ccircle cx='35' cy='53' r='3.8' fill='%23bf2a1a' opacity='.75' clip-path='url(%23c)'/%3E%3Ccircle cx='58' cy='48' r='3.2' fill='%23bf2a1a' opacity='.75' clip-path='url(%23c)'/%3E%3Ccircle cx='47' cy='39' r='2.5' fill='%23bf2a1a' opacity='.75' clip-path='url(%23c)'/%3E%3Cellipse cx='50' cy='80' rx='30' ry='14' fill='%23c9a040' clip-path='url(%23c)'/%3E%3Cpath d='M20 80 Q50 57 80 80' fill='%23e0bc48' clip-path='url(%23c)'/%3E%3Cpath d='M25 80 Q50 60 75 80' fill='none' stroke='rgba(255,255,255,.52)' stroke-width='2' stroke-dasharray='4,3' clip-path='url(%23c)'/%3E%3Ccircle cx='50' cy='50' r='48' fill='none' stroke='rgba(255,255,255,.15)' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="icon" href="Icon.jpg" type="image/jpeg">
+<link rel="apple-touch-icon" href="Icon.jpg">
+<link rel="manifest" href="manifest.json">
 <style>
 :root{
   --accent:#E8622A;--accent2:#C44D1A;
@@ -90,7 +94,6 @@ body{
 @media(max-width:768px){#topbar{display:flex;}}
 .tb-menu-btn{width:36px;height:36px;border-radius:10px;border:none;background:rgba(255,255,255,.65);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.08);}
 .tb-title{flex:1;font-size:1rem;font-weight:800;color:var(--text);letter-spacing:-.3px;}
-.tb-update{width:36px;height:36px;border-radius:10px;border:none;background:rgba(232,98,42,.12);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
 .section{display:none;padding:24px 20px;position:relative;min-height:calc(100dvh - 80px);}
 .section.active{display:block;}
 @media(min-width:769px){.section{padding:28px 28px;min-height:calc(100dvh - 40px);}}
@@ -175,13 +178,12 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
 .stock-low{color:var(--red);}
 .stock-ok{color:var(--green);}
-.update-fab{position:fixed;bottom:calc(env(safe-area-inset-bottom,16px)+20px);right:20px;z-index:300;width:48px;height:48px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 16px rgba(232,98,42,.45);display:flex;align-items:center;justify-content:center;transition:transform .2s;}
-.update-fab:active{transform:scale(.88);}
-.qs-fab{position:fixed;bottom:calc(env(safe-area-inset-bottom,16px)+20px);left:50%;transform:translateX(-50%);z-index:300;display:flex;align-items:center;gap:7px;padding:14px 22px;border-radius:var(--r-pill);border:none;background:linear-gradient(135deg,#2da44e,#1a8f3c);color:#fff;font-size:.88rem;font-weight:750;cursor:pointer;box-shadow:0 4px 20px rgba(52,199,89,.50),0 2px 8px rgba(0,0,0,.12);transition:transform .18s,box-shadow .18s;font-family:inherit;letter-spacing:-.2px;white-space:nowrap;}
-.qs-fab:active{transform:translateX(-50%) scale(.92);box-shadow:0 2px 8px rgba(52,199,89,.35);}
-.qs-product-row{display:flex;align-items:center;padding:10px 12px;border-radius:var(--r-md);background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.75);margin-bottom:6px;cursor:pointer;transition:background .15s,border-color .15s;gap:10px;}
-.qs-product-row:active,.qs-product-row.selected{background:rgba(52,199,89,.12);border-color:rgba(52,199,89,.35);}
-.qs-product-row.selected{box-shadow:inset 0 0 0 2px rgba(52,199,89,.4);}
+.tb-qs-btn{flex-shrink:0;padding:8px 16px;border-radius:var(--r-pill);border:none;background:linear-gradient(135deg,#34c759,#1a8f3c);color:#fff;font-size:.82rem;font-weight:750;cursor:pointer;box-shadow:0 2px 10px rgba(52,199,89,.4);font-family:inherit;transition:transform .15s;white-space:nowrap;letter-spacing:-.1px;}
+.tb-qs-btn:active{transform:scale(.92);}
+.sb-qs-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:11px 16px;border-radius:var(--r-pill);border:none;background:linear-gradient(135deg,#34c759,#1a8f3c);color:#fff;font-size:.85rem;font-weight:750;cursor:pointer;box-shadow:0 3px 14px rgba(52,199,89,.38);font-family:inherit;transition:transform .15s,box-shadow .15s;}
+.sb-qs-btn:active{transform:scale(.96);box-shadow:0 1px 6px rgba(52,199,89,.25);}
+.sb-update-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 14px;border-radius:10px;border:none;background:rgba(255,255,255,.45);color:var(--text3);font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s,color .15s;margin-top:8px;width:100%;}
+.sb-update-btn:hover{background:rgba(255,255,255,.65);color:var(--text2);}
 </style>
 </head>
 <body>
@@ -241,6 +243,12 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
       <div class="sb-avatar" id="sb-avatar">?</div>
       <div style="flex:1;min-width:0;"><div class="sb-name" id="sb-name">—</div><div class="sb-email" id="sb-email">—</div></div>
     </div>
+    <div style="padding:8px 10px 6px;">
+      <button class="sb-qs-btn" onclick="closeSidebar();openQuickSale()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Venta rápida
+      </button>
+    </div>
     <div class="sb-nav">
       <div class="sb-section-lbl">Principal</div>
       <button class="sb-nav-btn active" data-view="dash" onclick="setView('dash')"><span class="icon">🏠</span> Inicio</button>
@@ -261,6 +269,10 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
     </div>
     <div class="sb-footer">
       <div class="sb-version" id="sb-version">v1.0.0</div>
+      <button class="sb-update-btn" onclick="doUpdate()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+        Actualizar app
+      </button>
       <button class="sb-signout" onclick="signOutUser()">⎋ Cerrar sesión</button>
     </div>
   </div>
@@ -268,7 +280,7 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
     <div id="topbar">
       <button class="tb-menu-btn" onclick="openSidebar()">☰</button>
       <span class="tb-title" id="topbar-title">Inicio</span>
-      <button class="tb-update" onclick="doUpdate()">🔄</button>
+      <button class="tb-qs-btn" onclick="openQuickSale()">⚡ Venta</button>
     </div>
     <div id="view-dash" class="section active">
       <div class="section-header">
@@ -386,7 +398,6 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
     <div id="access-users-list"></div>
   </div>
 </div>
-<button class="qs-fab" id="qs-fab" onclick="openQuickSale()">⚡ Venta rápida</button>
 <div class="modal-overlay" id="quick-sale-modal" onclick="maybeClose('quick-sale-modal',event)">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -413,15 +424,14 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
       <span style="font-size:.88rem;font-weight:650;color:var(--text);">Total a cobrar</span>
       <span id="qs-total" style="font-size:1.45rem;font-weight:800;color:#1a8f3c;">$0</span>
     </div>
-    <button class="btn" style="width:100%;background:linear-gradient(135deg,#2da44e,#1a8f3c);color:#fff;box-shadow:0 4px 18px rgba(52,199,89,.38);font-size:.9rem;padding:13px;" onclick="submitQuickSale()">✓ Registrar Venta</button>
+    <button class="btn" style="width:100%;background:linear-gradient(135deg,#34c759,#1a8f3c);color:#fff;box-shadow:0 4px 18px rgba(52,199,89,.38);font-size:.9rem;padding:13px;" onclick="submitQuickSale()">✓ Registrar Venta</button>
   </div>
 </div>
-<button class="update-fab" onclick="doUpdate()">🔄</button>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script>
-var APP_VERSION='1.1.0',APP_BUILD='28/05/26';
+var APP_VERSION='1.2.0',APP_BUILD='28/05/26';
 document.getElementById('sb-version').textContent='v'+APP_VERSION+' · '+APP_BUILD;
 var firebaseConfig={apiKey:'AIzaSyDpzlN1gaJUH6XGAWv5GRW_suk7zcqKeJE',authDomain:'medtrack-cima-3e9c1.firebaseapp.com',projectId:'medtrack-cima-3e9c1',storageBucket:'medtrack-cima-3e9c1.firebasestorage.app',messagingSenderId:'110780335014',appId:'1:110780335014:web:b991d26e01637bdc884567'};
 if(typeof firebase!=='undefined'&&!firebase.apps.length)firebase.initializeApp(firebaseConfig);
