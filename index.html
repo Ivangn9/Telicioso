@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="app-version" content="v2026.05.28.1">
+<meta name="app-version" content="v2026.05.28.2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">
@@ -177,6 +177,11 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
 .stock-ok{color:var(--green);}
 .update-fab{position:fixed;bottom:calc(env(safe-area-inset-bottom,16px)+20px);right:20px;z-index:300;width:48px;height:48px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 16px rgba(232,98,42,.45);display:flex;align-items:center;justify-content:center;transition:transform .2s;}
 .update-fab:active{transform:scale(.88);}
+.qs-fab{position:fixed;bottom:calc(env(safe-area-inset-bottom,16px)+20px);left:50%;transform:translateX(-50%);z-index:300;display:flex;align-items:center;gap:7px;padding:14px 22px;border-radius:var(--r-pill);border:none;background:linear-gradient(135deg,#2da44e,#1a8f3c);color:#fff;font-size:.88rem;font-weight:750;cursor:pointer;box-shadow:0 4px 20px rgba(52,199,89,.50),0 2px 8px rgba(0,0,0,.12);transition:transform .18s,box-shadow .18s;font-family:inherit;letter-spacing:-.2px;white-space:nowrap;}
+.qs-fab:active{transform:translateX(-50%) scale(.92);box-shadow:0 2px 8px rgba(52,199,89,.35);}
+.qs-product-row{display:flex;align-items:center;padding:10px 12px;border-radius:var(--r-md);background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.75);margin-bottom:6px;cursor:pointer;transition:background .15s,border-color .15s;gap:10px;}
+.qs-product-row:active,.qs-product-row.selected{background:rgba(52,199,89,.12);border-color:rgba(52,199,89,.35);}
+.qs-product-row.selected{box-shadow:inset 0 0 0 2px rgba(52,199,89,.4);}
 </style>
 </head>
 <body>
@@ -381,12 +386,42 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
     <div id="access-users-list"></div>
   </div>
 </div>
+<button class="qs-fab" id="qs-fab" onclick="openQuickSale()">⚡ Venta rápida</button>
+<div class="modal-overlay" id="quick-sale-modal" onclick="maybeClose('quick-sale-modal',event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div class="modal-title" style="margin-bottom:0;">⚡ Venta Rápida</div>
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('quick-sale-modal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Producto *</label>
+      <select class="form-input" id="qs-product" onchange="updQS()"></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Cantidad *</label>
+        <input class="form-input" type="number" id="qs-qty" min="1" value="1" oninput="updQS()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Forma de pago</label>
+        <select class="form-input" id="qs-payment"><option>Efectivo</option><option>Transferencia</option></select>
+      </div>
+    </div>
+    <div id="qs-info" style="font-size:.75rem;color:var(--text3);margin:-6px 0 12px;min-height:16px;"></div>
+    <div style="background:rgba(52,199,89,.10);border:1px solid rgba(52,199,89,.22);border-radius:12px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <span style="font-size:.88rem;font-weight:650;color:var(--text);">Total a cobrar</span>
+      <span id="qs-total" style="font-size:1.45rem;font-weight:800;color:#1a8f3c;">$0</span>
+    </div>
+    <button class="btn" style="width:100%;background:linear-gradient(135deg,#2da44e,#1a8f3c);color:#fff;box-shadow:0 4px 18px rgba(52,199,89,.38);font-size:.9rem;padding:13px;" onclick="submitQuickSale()">✓ Registrar Venta</button>
+  </div>
+</div>
 <button class="update-fab" onclick="doUpdate()">🔄</button>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script>
-var APP_VERSION='1.0.0',APP_BUILD='28/05/26';
+var APP_VERSION='1.1.0',APP_BUILD='28/05/26';
 document.getElementById('sb-version').textContent='v'+APP_VERSION+' · '+APP_BUILD;
 var firebaseConfig={apiKey:'AIzaSyDpzlN1gaJUH6XGAWv5GRW_suk7zcqKeJE',authDomain:'medtrack-cima-3e9c1.firebaseapp.com',projectId:'medtrack-cima-3e9c1',storageBucket:'medtrack-cima-3e9c1.firebasestorage.app',messagingSenderId:'110780335014',appId:'1:110780335014:web:b991d26e01637bdc884567'};
 if(typeof firebase!=='undefined'&&!firebase.apps.length)firebase.initializeApp(firebaseConfig);
@@ -505,6 +540,48 @@ function renderFin(){var sel=document.getElementById('fin-month-select'),month=s
 function renderBarChart(){var months=[];for(var i=5;i>=0;i--){var d=new Date();d.setMonth(d.getMonth()-i);months.push(d.toISOString().substr(0,7));}var maxV=1,data=months.map(function(m){var inc=state.sales.filter(function(s){return s.date.startsWith(m);}).reduce(function(a,s){return a+s.total;},0),exp=state.expenses.filter(function(e){return e.date.startsWith(m);}).reduce(function(a,e){return a+e.amount;},0);maxV=Math.max(maxV,inc,exp);return{m:m,inc:inc,exp:exp,pft:Math.max(0,inc-exp)};});var H=140,cont=document.getElementById('fin-bar-chart');if(!cont)return;cont.innerHTML='<div style="display:flex;align-items:flex-end;gap:4px;height:'+(H+28)+'px;">'+data.map(function(d){var ih=Math.max(2,Math.round((d.inc/maxV)*H)),eh=Math.max(0,Math.round((d.exp/maxV)*H)),ph=Math.max(0,Math.round((d.pft/maxV)*H)),lb=new Date(d.m+'-01').toLocaleDateString('es-AR',{month:'short'});return'<div style="flex:1;display:flex;flex-direction:column;align-items:center;"><div style="width:100%;display:flex;align-items:flex-end;justify-content:center;gap:2px;height:'+H+'px;"><div style="flex:1;height:'+ih+'px;background:var(--accent);border-radius:4px 4px 0 0;"></div><div style="flex:1;height:'+eh+'px;background:var(--red);border-radius:4px 4px 0 0;opacity:.85;"></div><div style="flex:1;height:'+ph+'px;background:var(--green);border-radius:4px 4px 0 0;opacity:.85;"></div></div><div style="font-size:.6rem;color:var(--text3);text-transform:capitalize;margin-top:4px;text-align:center;">'+lb+'</div></div>';}).join('')+'</div>';}
 function renderCatChart(expenses){var cats={pizzas:0,empanadas:0,noquis:0,general:0};expenses.forEach(function(e){cats[e.category]=(cats[e.category]||0)+e.amount;});var tot=Object.values(cats).reduce(function(a,b){return a+b;},0),el=document.getElementById('fin-cat-chart');if(!tot){el.innerHTML='<div style="color:var(--text3);font-size:.82rem;padding:8px 0;">Sin gastos</div>';return;}var clr={pizzas:'var(--accent)',empanadas:'var(--orange)',noquis:'var(--blue)',general:'var(--purple)'};el.innerHTML=Object.entries(cats).filter(function(e){return e[1]>0;}).map(function(e){var pct=Math.round((e[1]/tot)*100);return'<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px;"><span>'+cL(e[0])+'</span><span style="font-weight:700;">'+$m(e[1])+'<span style="color:var(--text3);font-weight:400;"> ('+pct+'%)</span></span></div><div class="pct-bar-wrap"><div class="pct-bar" style="width:'+pct+'%;background:'+clr[e[0]]+'"></div></div></div>';}).join('');}
 function renderPayChart(sales){var methods={};sales.forEach(function(s){methods[s.paymentMethod]=(methods[s.paymentMethod]||0)+s.total;});var tot=Object.values(methods).reduce(function(a,b){return a+b;},0),el=document.getElementById('fin-pay-chart');if(!tot){el.innerHTML='<div style="color:var(--text3);font-size:.82rem;padding:8px 0;">Sin ventas</div>';return;}var clrs=['var(--accent)','var(--blue)','var(--green)','var(--purple)'];el.innerHTML=Object.entries(methods).map(function(e,i){var pct=Math.round((e[1]/tot)*100);return'<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:4px;"><span>'+e[0]+'</span><span style="font-weight:700;">'+$m(e[1])+'<span style="color:var(--text3);font-weight:400;"> ('+pct+'%)</span></span></div><div class="pct-bar-wrap"><div class="pct-bar" style="width:'+pct+'%;background:'+clrs[i%clrs.length]+'"></div></div></div>';}).join('');}
+function openQuickSale(){
+  var prods=state.products.filter(function(p){return p.active;});
+  if(!prods.length){toast('⚠️ Sin productos. Agregá desde Gestión.');return;}
+  var sel=document.getElementById('qs-product');
+  sel.innerHTML=prods.map(function(p){
+    var stk=p.stock>0?'Stock: '+p.stock:'⚠️ Sin stock';
+    return'<option value="'+p.id+'" data-price="'+p.price+'" data-stock="'+p.stock+'">'+p.name+' — '+$m(p.price)+' ('+stk+')</option>';
+  }).join('');
+  document.getElementById('qs-qty').value='1';
+  updQS();
+  openModal('quick-sale-modal');
+}
+function updQS(){
+  var sel=document.getElementById('qs-product'),opt=sel&&sel.options[sel.selectedIndex];
+  if(!opt)return;
+  var price=parseFloat(opt.dataset.price)||0,stock=parseInt(opt.dataset.stock)||0;
+  var qty=Math.max(1,parseInt(document.getElementById('qs-qty').value)||1);
+  document.getElementById('qs-total').textContent=$m(price*qty);
+  var info=document.getElementById('qs-info');
+  if(stock<=0){
+    info.style.color='var(--red)';info.textContent='⚠️ Sin stock disponible';
+  }else if(qty>stock){
+    info.style.color='var(--red)';info.textContent='⚠️ Solo hay '+stock+' en stock';
+  }else{
+    info.style.color='var(--text3)';info.textContent='Stock disponible: '+stock+' uds · '+$m(price)+' c/u';
+  }
+}
+function submitQuickSale(){
+  var sel=document.getElementById('qs-product'),opt=sel&&sel.options[sel.selectedIndex];
+  var pid=sel&&sel.value,qty=parseInt(document.getElementById('qs-qty').value)||0;
+  var payment=document.getElementById('qs-payment').value;
+  if(!pid||qty<1){toast('⚠️ Completá los campos');return;}
+  var p=state.products.find(function(x){return x.id===pid;});
+  if(!p){toast('⚠️ Producto no encontrado');return;}
+  if(p.stock<qty){toast('⚠️ Stock insuficiente: '+p.name+' ('+p.stock+' disponibles)');return;}
+  var total=p.price*qty;
+  p.stock=Math.max(0,p.stock-qty);
+  state.sales.push({id:uid(),date:new Date().toISOString(),customer:'Venta rápida',items:[{productId:pid,name:p.name,qty:qty,price:p.price}],paymentMethod:payment,total:total});
+  save();renderAll();
+  closeModal('quick-sale-modal');
+  toast('✅ '+qty+'× '+p.name+' · '+$m(total)+' · '+payment);
+}
 function openModal(id){var el=document.getElementById(id);if(el)el.classList.add('open');}
 function closeModal(id){var el=document.getElementById(id);if(el)el.classList.remove('open');}
 function maybeClose(id,ev){if(ev&&ev.target===document.getElementById(id))closeModal(id);}
