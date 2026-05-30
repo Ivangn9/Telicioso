@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="app-version" content="v2026.05.30.1">
+<meta name="app-version" content="v2026.05.30.2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Telicioso">
@@ -164,6 +164,9 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
 .qs-prod-btn:active{transform:scale(.95);}
 .qs-prod-btn.selected{background:rgba(52,199,89,.18);border-color:rgba(52,199,89,.55);color:#1a8f3c;box-shadow:0 0 0 2px rgba(52,199,89,.25);}
 .qs-prod-btn .qs-stock-lbl{font-size:.58rem;font-weight:500;opacity:.7;}
+.qs-pay-btn{flex:1;padding:9px 4px;background:rgba(255,255,255,.38);border:1.5px solid rgba(255,255,255,.55);border-radius:12px;cursor:pointer;font-size:.75rem;font-weight:650;color:var(--text2);transition:.15s;-webkit-tap-highlight-color:transparent;text-align:center;}
+.qs-pay-btn:active{transform:scale(.95);}
+.qs-pay-btn.selected{background:rgba(0,122,255,.15);border-color:rgba(0,122,255,.45);color:var(--blue);box-shadow:0 0 0 2px rgba(0,122,255,.18);}
 .tabs{display:flex;gap:4px;padding:4px;background:rgba(255,255,255,.32);border:1px solid rgba(255,255,255,.52);border-radius:12px;margin-bottom:16px;}
 .tab{flex:1;padding:7px 10px;border-radius:8px;border:none;background:transparent;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--text3);transition:.15s;font-family:inherit;}
 .tab.active{background:#fff;color:var(--accent);box-shadow:0 2px 8px rgba(232,98,42,.15);}
@@ -472,7 +475,10 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
       </div>
       <div class="form-group">
         <label class="form-label">Forma de pago</label>
-        <select class="form-input" id="qs-payment"><option>Efectivo</option><option>Transferencia</option></select>
+        <div style="display:flex;gap:6px;margin-top:2px;">
+          <button class="qs-pay-btn selected" id="qsp-Efectivo" onclick="selectQSPayment('Efectivo')">💵 Efectivo</button>
+          <button class="qs-pay-btn" id="qsp-Transferencia" onclick="selectQSPayment('Transferencia')">📲 Transferencia</button>
+        </div>
       </div>
     </div>
     <div id="qs-info" style="font-size:.75rem;color:var(--text3);margin:-6px 0 12px;min-height:16px;"></div>
@@ -515,14 +521,14 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script>
-var APP_VERSION='1.9.2',APP_BUILD='30/05/26';
+var APP_VERSION='1.9.3',APP_BUILD='30/05/26';
 document.getElementById('sb-version').textContent='v'+APP_VERSION+' · '+APP_BUILD;
 var firebaseConfig={apiKey:'AIzaSyDpzlN1gaJUH6XGAWv5GRW_suk7zcqKeJE',authDomain:'medtrack-cima-3e9c1.firebaseapp.com',projectId:'medtrack-cima-3e9c1',storageBucket:'medtrack-cima-3e9c1.firebasestorage.app',messagingSenderId:'110780335014',appId:'1:110780335014:web:b991d26e01637bdc884567'};
 if(typeof firebase!=='undefined'&&!firebase.apps.length)firebase.initializeApp(firebaseConfig);
 var _auth=typeof firebase!=='undefined'?firebase.auth():null;
 var _db=typeof firebase!=='undefined'?firebase.firestore():null;
 var ADMIN_EMAILS=['ivangarcian@gmail.com'];
-var _user=null,state={products:[],sales:[],expenses:[],fund:0},curView='dash',gF='all',vT='nueva',gT='nuevo',asCat='',toastT=null,saveT=null,_unsubData=null,qsPid=null;
+var _user=null,state={products:[],sales:[],expenses:[],fund:0},curView='dash',gF='all',vT='nueva',gT='nuevo',asCat='',toastT=null,saveT=null,_unsubData=null,qsPid=null,qsPayment='Efectivo';
 function signInGoogle(){if(!_auth){showApp();return;}var p=new firebase.auth.GoogleAuthProvider();p.addScope('profile');p.addScope('email');_auth.signInWithPopup(p).catch(function(e){var el=document.getElementById('login-error');el.textContent='⚠️ '+e.message;el.style.display='block';});}
 function signOutUser(){if(_unsubData){_unsubData();_unsubData=null;}if(_auth)_auth.signOut();document.getElementById('app').style.display='none';document.getElementById('access-denied').style.display='none';document.getElementById('login-screen').style.display='flex';}
 function showApp(){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='flex';loadLS();seedD();renderAll();}
@@ -714,6 +720,9 @@ function openQuickSale(){
   var prods=state.products.filter(function(p){return p.active;});
   if(!prods.length){toast('⚠️ Sin productos. Agregá desde Gestión.');return;}
   qsPid=null;
+  qsPayment='Efectivo';
+  document.querySelectorAll('.qs-pay-btn').forEach(function(b){b.classList.remove('selected');});
+  var defPay=document.getElementById('qsp-Efectivo');if(defPay)defPay.classList.add('selected');
   document.getElementById('qs-qty').value='1';
   document.getElementById('qs-total').textContent='$0';
   document.getElementById('qs-info').textContent='';
@@ -758,6 +767,12 @@ function selectQSProduct(pid){
   if(btn)btn.classList.add('selected');
   updQS();
 }
+function selectQSPayment(method){
+  qsPayment=method;
+  document.querySelectorAll('.qs-pay-btn').forEach(function(b){b.classList.remove('selected');});
+  var btn=document.getElementById('qsp-'+method);
+  if(btn)btn.classList.add('selected');
+}
 function updQS(){
   if(!qsPid){document.getElementById('qs-total').textContent='$0';document.getElementById('qs-info').textContent='';return;}
   var btn=document.getElementById('qsb-'+qsPid);
@@ -776,7 +791,7 @@ function updQS(){
 }
 function submitQuickSale(){
   var qty=parseInt(document.getElementById('qs-qty').value)||0;
-  var payment=document.getElementById('qs-payment').value;
+  var payment=qsPayment||'Efectivo';
   if(!qsPid||qty<1){toast('⚠️ Seleccioná un producto y cantidad');return;}
   var p=state.products.find(function(x){return x.id===qsPid;});
   if(!p){toast('⚠️ Producto no encontrado');return;}
