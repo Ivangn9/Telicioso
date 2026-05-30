@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="app-version" content="v2026.05.28.7">
+<meta name="app-version" content="v2026.05.30.1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Telicioso">
@@ -159,6 +159,11 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
 .badge-purple{background:rgba(175,82,222,.12);color:var(--purple);}
 .pct-bar-wrap{background:rgba(0,0,0,.07);border-radius:20px;height:8px;margin:6px 0;overflow:hidden;}
 .pct-bar{height:100%;border-radius:20px;transition:width .8s var(--spring);}
+.qs-cat-lbl{grid-column:1/-1;font-size:.65rem;font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin:4px 0 2px;}
+.qs-prod-btn{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;background:rgba(255,255,255,.45);border:1.5px solid rgba(255,255,255,.6);border-radius:14px;cursor:pointer;font-size:.72rem;font-weight:650;color:var(--text);text-align:center;line-height:1.25;transition:.15s;-webkit-tap-highlight-color:transparent;min-height:64px;justify-content:center;}
+.qs-prod-btn:active{transform:scale(.95);}
+.qs-prod-btn.selected{background:rgba(52,199,89,.18);border-color:rgba(52,199,89,.55);color:#1a8f3c;box-shadow:0 0 0 2px rgba(52,199,89,.25);}
+.qs-prod-btn .qs-stock-lbl{font-size:.58rem;font-weight:500;opacity:.7;}
 .tabs{display:flex;gap:4px;padding:4px;background:rgba(255,255,255,.32);border:1px solid rgba(255,255,255,.52);border-radius:12px;margin-bottom:16px;}
 .tab{flex:1;padding:7px 10px;border-radius:8px;border:none;background:transparent;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--text3);transition:.15s;font-family:inherit;}
 .tab.active{background:#fff;color:var(--accent);box-shadow:0 2px 8px rgba(232,98,42,.15);}
@@ -458,7 +463,7 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
     </div>
     <div class="form-group">
       <label class="form-label">Producto *</label>
-      <select class="form-input" id="qs-product" onchange="updQS()"></select>
+      <div id="qs-product-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:220px;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:4px;padding:2px;"></div>
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -510,14 +515,14 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script>
-var APP_VERSION='1.9.1',APP_BUILD='28/05/26';
+var APP_VERSION='1.9.2',APP_BUILD='30/05/26';
 document.getElementById('sb-version').textContent='v'+APP_VERSION+' · '+APP_BUILD;
 var firebaseConfig={apiKey:'AIzaSyDpzlN1gaJUH6XGAWv5GRW_suk7zcqKeJE',authDomain:'medtrack-cima-3e9c1.firebaseapp.com',projectId:'medtrack-cima-3e9c1',storageBucket:'medtrack-cima-3e9c1.firebasestorage.app',messagingSenderId:'110780335014',appId:'1:110780335014:web:b991d26e01637bdc884567'};
 if(typeof firebase!=='undefined'&&!firebase.apps.length)firebase.initializeApp(firebaseConfig);
 var _auth=typeof firebase!=='undefined'?firebase.auth():null;
 var _db=typeof firebase!=='undefined'?firebase.firestore():null;
 var ADMIN_EMAILS=['ivangarcian@gmail.com'];
-var _user=null,state={products:[],sales:[],expenses:[],fund:0},curView='dash',gF='all',vT='nueva',gT='nuevo',asCat='',toastT=null,saveT=null,_unsubData=null;
+var _user=null,state={products:[],sales:[],expenses:[],fund:0},curView='dash',gF='all',vT='nueva',gT='nuevo',asCat='',toastT=null,saveT=null,_unsubData=null,qsPid=null;
 function signInGoogle(){if(!_auth){showApp();return;}var p=new firebase.auth.GoogleAuthProvider();p.addScope('profile');p.addScope('email');_auth.signInWithPopup(p).catch(function(e){var el=document.getElementById('login-error');el.textContent='⚠️ '+e.message;el.style.display='block';});}
 function signOutUser(){if(_unsubData){_unsubData();_unsubData=null;}if(_auth)_auth.signOut();document.getElementById('app').style.display='none';document.getElementById('access-denied').style.display='none';document.getElementById('login-screen').style.display='flex';}
 function showApp(){document.getElementById('login-screen').style.display='none';document.getElementById('app').style.display='flex';loadLS();seedD();renderAll();}
@@ -708,19 +713,56 @@ function renderPayChart(sales){var methods={};sales.forEach(function(s){methods[
 function openQuickSale(){
   var prods=state.products.filter(function(p){return p.active;});
   if(!prods.length){toast('⚠️ Sin productos. Agregá desde Gestión.');return;}
-  var sel=document.getElementById('qs-product');
-  sel.innerHTML=prods.map(function(p){
-    var stk=p.stock>0?'Stock: '+p.stock:'⚠️ Sin stock';
-    return'<option value="'+p.id+'" data-price="'+p.price+'" data-stock="'+p.stock+'">'+p.name+' — '+$m(p.price)+' ('+stk+')</option>';
-  }).join('');
+  qsPid=null;
   document.getElementById('qs-qty').value='1';
-  updQS();
+  document.getElementById('qs-total').textContent='$0';
+  document.getElementById('qs-info').textContent='';
+  var cats=['pizzas','empanadas','noquis'];
+  var catLabel={pizzas:'Pizzas',empanadas:'Empanadas',noquis:'Ñoquis'};
+  var grid=document.getElementById('qs-product-grid');
+  var html='';
+  cats.forEach(function(cat){
+    var cp=prods.filter(function(p){return p.category===cat;});
+    if(!cp.length)return;
+    html+='<div class="qs-cat-lbl">'+catLabel[cat]+'</div>';
+    cp.forEach(function(p){
+      var iconSvg=getProductIcon(p.name,p.category);
+      var stk=p.stock>0?p.stock+' uds':'Sin stock';
+      html+='<button class="qs-prod-btn" id="qsb-'+p.id+'" onclick="selectQSProduct(\''+p.id+'\')" data-price="'+p.price+'" data-stock="'+p.stock+'">'+
+        '<span style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;">'+iconSvg+'</span>'+
+        '<span>'+p.name+'</span>'+
+        '<span class="qs-stock-lbl">'+stk+'</span>'+
+      '</button>';
+    });
+  });
+  var other=prods.filter(function(p){return cats.indexOf(p.category)===-1;});
+  if(other.length){
+    html+='<div class="qs-cat-lbl">Otros</div>';
+    other.forEach(function(p){
+      var iconSvg=getProductIcon(p.name,p.category);
+      var stk=p.stock>0?p.stock+' uds':'Sin stock';
+      html+='<button class="qs-prod-btn" id="qsb-'+p.id+'" onclick="selectQSProduct(\''+p.id+'\')" data-price="'+p.price+'" data-stock="'+p.stock+'">'+
+        '<span style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;">'+iconSvg+'</span>'+
+        '<span>'+p.name+'</span>'+
+        '<span class="qs-stock-lbl">'+stk+'</span>'+
+      '</button>';
+    });
+  }
+  grid.innerHTML=html;
   openModal('quick-sale-modal');
 }
+function selectQSProduct(pid){
+  qsPid=pid;
+  document.querySelectorAll('.qs-prod-btn').forEach(function(b){b.classList.remove('selected');});
+  var btn=document.getElementById('qsb-'+pid);
+  if(btn)btn.classList.add('selected');
+  updQS();
+}
 function updQS(){
-  var sel=document.getElementById('qs-product'),opt=sel&&sel.options[sel.selectedIndex];
-  if(!opt)return;
-  var price=parseFloat(opt.dataset.price)||0,stock=parseInt(opt.dataset.stock)||0;
+  if(!qsPid){document.getElementById('qs-total').textContent='$0';document.getElementById('qs-info').textContent='';return;}
+  var btn=document.getElementById('qsb-'+qsPid);
+  if(!btn)return;
+  var price=parseFloat(btn.dataset.price)||0,stock=parseInt(btn.dataset.stock)||0;
   var qty=Math.max(1,parseInt(document.getElementById('qs-qty').value)||1);
   document.getElementById('qs-total').textContent=$m(price*qty);
   var info=document.getElementById('qs-info');
@@ -733,19 +775,19 @@ function updQS(){
   }
 }
 function submitQuickSale(){
-  var sel=document.getElementById('qs-product'),opt=sel&&sel.options[sel.selectedIndex];
-  var pid=sel&&sel.value,qty=parseInt(document.getElementById('qs-qty').value)||0;
+  var qty=parseInt(document.getElementById('qs-qty').value)||0;
   var payment=document.getElementById('qs-payment').value;
-  if(!pid||qty<1){toast('⚠️ Completá los campos');return;}
-  var p=state.products.find(function(x){return x.id===pid;});
+  if(!qsPid||qty<1){toast('⚠️ Seleccioná un producto y cantidad');return;}
+  var p=state.products.find(function(x){return x.id===qsPid;});
   if(!p){toast('⚠️ Producto no encontrado');return;}
   if(p.stock<qty){toast('⚠️ Stock insuficiente: '+p.name+' ('+p.stock+' disponibles)');return;}
   var total=p.price*qty;
   p.stock=Math.max(0,p.stock-qty);
   var customer=(document.getElementById('qs-customer').value.trim())||'Venta rápida';
-  state.sales.push({id:uid(),date:new Date().toISOString(),customer:customer,items:[{productId:pid,name:p.name,qty:qty,price:p.price}],paymentMethod:payment,total:total});
+  state.sales.push({id:uid(),date:new Date().toISOString(),customer:customer,items:[{productId:qsPid,name:p.name,qty:qty,price:p.price}],paymentMethod:payment,total:total});
   save();renderAll();
   document.getElementById('qs-customer').value='';
+  qsPid=null;
   closeModal('quick-sale-modal');
   toast('✅ '+qty+'× '+p.name+' · '+$m(total)+' · '+customer);
 }
