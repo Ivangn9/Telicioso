@@ -453,6 +453,10 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
       <button class="btn btn-secondary btn-sm" onclick="closeModal('quick-sale-modal')">✕</button>
     </div>
     <div class="form-group">
+      <label class="form-label">Cliente</label>
+      <input class="form-input" id="qs-customer" placeholder="Nombre del cliente (opcional)">
+    </div>
+    <div class="form-group">
       <label class="form-label">Producto *</label>
       <select class="form-input" id="qs-product" onchange="updQS()"></select>
     </div>
@@ -506,7 +510,7 @@ select.form-input{-webkit-appearance:none;appearance:none;cursor:pointer;backgro
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script>
-var APP_VERSION='1.9.0',APP_BUILD='28/05/26';
+var APP_VERSION='1.9.1',APP_BUILD='28/05/26';
 document.getElementById('sb-version').textContent='v'+APP_VERSION+' · '+APP_BUILD;
 var firebaseConfig={apiKey:'AIzaSyDpzlN1gaJUH6XGAWv5GRW_suk7zcqKeJE',authDomain:'medtrack-cima-3e9c1.firebaseapp.com',projectId:'medtrack-cima-3e9c1',storageBucket:'medtrack-cima-3e9c1.firebasestorage.app',messagingSenderId:'110780335014',appId:'1:110780335014:web:b991d26e01637bdc884567'};
 if(typeof firebase!=='undefined'&&!firebase.apps.length)firebase.initializeApp(firebaseConfig);
@@ -738,10 +742,12 @@ function submitQuickSale(){
   if(p.stock<qty){toast('⚠️ Stock insuficiente: '+p.name+' ('+p.stock+' disponibles)');return;}
   var total=p.price*qty;
   p.stock=Math.max(0,p.stock-qty);
-  state.sales.push({id:uid(),date:new Date().toISOString(),customer:'Venta rápida',items:[{productId:pid,name:p.name,qty:qty,price:p.price}],paymentMethod:payment,total:total});
+  var customer=(document.getElementById('qs-customer').value.trim())||'Venta rápida';
+  state.sales.push({id:uid(),date:new Date().toISOString(),customer:customer,items:[{productId:pid,name:p.name,qty:qty,price:p.price}],paymentMethod:payment,total:total});
   save();renderAll();
+  document.getElementById('qs-customer').value='';
   closeModal('quick-sale-modal');
-  toast('✅ '+qty+'× '+p.name+' · '+$m(total)+' · '+payment);
+  toast('✅ '+qty+'× '+p.name+' · '+$m(total)+' · '+customer);
 }
 function openModal(id){var el=document.getElementById(id);if(el)el.classList.add('open');}
 function closeModal(id){var el=document.getElementById(id);if(el)el.classList.remove('open');}
